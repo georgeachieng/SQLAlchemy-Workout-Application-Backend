@@ -138,6 +138,97 @@ flask --app app run --port 5555
 4. Retrieve individual workouts and exercises to verify nested serialization.
 5. Try invalid payloads to confirm validations are enforced.
 
+## Endpoint Testing Record
+The endpoints below are being tested manually with `curl` while the Flask server is running on `http://127.0.0.1:5555`.
+
+Start the API from the `server/` directory:
+```bash
+flask --app app run --port 5555
+```
+
+### 1. Test `GET /workouts`
+Purpose: confirm the route responds successfully and returns the workout list in descending date order.
+
+Request:
+```bash
+curl -i http://127.0.0.1:5555/workouts
+```
+
+What to verify:
+- response status is `200 OK`
+- response body is a JSON array
+- each workout includes `id`, `date`, `duration_minutes`, and `notes`
+
+### 2. Test `POST /workouts`
+Purpose: confirm a workout can be created and the saved record is returned.
+
+Valid request:
+```bash
+curl -i -X POST http://127.0.0.1:5555/workouts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2026-04-22",
+    "duration_minutes": 45,
+    "notes": "Upper body strength session"
+  }'
+```
+
+What to verify:
+- response status is `201 Created`
+- response body includes the new `id`
+- returned JSON includes `date`, `duration_minutes`, `notes`, and `workout_exercises`
+- `workout_exercises` is returned as an empty array for a new workout
+
+Validation check:
+```bash
+curl -i -X POST http://127.0.0.1:5555/workouts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2099-01-01",
+    "duration_minutes": 45,
+    "notes": "Future workout"
+  }'
+```
+
+Expected result:
+- response status is `400 Bad Request`
+- response body contains a validation error for `date`
+
+### 3. Test `POST /exercises`
+Purpose: confirm an exercise can be created and normalized correctly.
+
+Valid request:
+```bash
+curl -i -X POST http://127.0.0.1:5555/exercises \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Push Up",
+    "category": "strength",
+    "equipment_needed": false
+  }'
+```
+
+What to verify:
+- response status is `201 Created`
+- response body includes the new `id`
+- returned JSON includes `name`, `category`, `equipment_needed`, and `workout_exercises`
+- `category` is stored in lowercase
+
+Validation check:
+```bash
+curl -i -X POST http://127.0.0.1:5555/exercises \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": " ",
+    "category": "strength",
+    "equipment_needed": false
+  }'
+```
+
+Expected result:
+- response status is `400 Bad Request`
+- response body contains a validation error for `name`
+
 ## Project Structure
 ```text
 .
