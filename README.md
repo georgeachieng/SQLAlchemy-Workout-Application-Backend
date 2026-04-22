@@ -27,17 +27,17 @@ cd server
 
 4. Initialize migrations the first time only:
 ```bash
-flask db init
+flask --app app db init
 ```
 
 5. Create a migration:
 ```bash
-flask db migrate -m "initial workout app models"
+flask --app app db migrate -m "initial workout app models"
 ```
 
 6. Apply the migration:
 ```bash
-flask db upgrade head
+flask --app app db upgrade head
 ```
 
 7. Seed the database:
@@ -48,12 +48,7 @@ python seed.py
 ## Run Instructions
 From the `server/` directory:
 ```bash
-flask run --port 5555
-```
-
-You can also run:
-```bash
-python app.py
+flask --app app run --port 5555
 ```
 
 ## API Endpoints
@@ -154,4 +149,3 @@ python app.py
     ├── schemas.py
     └── seed.py
 ```
-
